@@ -73,8 +73,7 @@ final class OpenIdConnectToken extends AbstractToken implements SessionlessToken
     public function extractIdentityTokenFromRequest(string $cookieName): IdentityToken
     {
         if ($this->authorizationHeader !== null && str_contains($this->authorizationHeader, 'Bearer ')) {
-            $identityToken = $this->extractIdentityTokenFromAuthorizationHeader($this->authorizationHeader);
-
+            return $this->extractIdentityTokenFromAuthorizationHeader($this->authorizationHeader);
         } elseif (isset($this->queryParameters[self::OIDC_PARAMETER_NAME])) {
             $authorizationIdQueryParameterName = OAuthClient::generateAuthorizationIdQueryParameterName(OAuthClient::SERVICE_TYPE);
             if (!isset($this->queryParameters[$authorizationIdQueryParameterName])) {
@@ -93,15 +92,13 @@ final class OpenIdConnectToken extends AbstractToken implements SessionlessToken
             try {
                 $identityToken = $client->getIdentityToken($authorizationIdentifier);
                 $client->removeAuthorization($authorizationIdentifier);
+                return $identityToken;
             } catch (ServiceException | ConnectionException $exception) {
                 throw new AccessDeniedException(sprintf('Could not extract identity token for authorization identifier "%s": %s', $authorizationIdentifier, $exception->getMessage()), 1560350413, $exception);
             }
         } else {
-            $identityToken = $this->extractIdentityTokenFromCookie($cookieName);
+            return $this->extractIdentityTokenFromCookie($cookieName);
         }
-
-        // NOTE: This token is not verified yet – signature and expiration time must be checked by code using this token
-        return $identityToken;
     }
 
     /**

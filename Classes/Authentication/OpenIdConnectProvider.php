@@ -174,6 +174,7 @@ final class OpenIdConnectProvider extends AbstractProvider
             $account->addRole($this->policyService->getRole($roleIdentifier));
         }
         $account->setAuthenticationProviderName($this->name);
+        // TODO: set OpenIdCredentialSource here
         $account->setCredentialsSource(IdentityToken::fromJwt($jwt));
         return $account;
     }
